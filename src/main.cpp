@@ -6,14 +6,16 @@
 #include <string>
 #include <vector>
 
+using namespace emscripten;
+
 class Document {
 public:
-  static emscripten::val query_selector(const std::string &target) {
-    return _document.call<emscripten::val>("querySelector", target);
+  static val query_selector(const std::string &target) {
+    return _document.call<val>("querySelector", target);
   }
 
 private:
-  inline static emscripten::val _document = emscripten::val::global("document");
+  inline static val _document = val::global("document");
 };
 
 std::string print(std::string json_object) {
@@ -24,8 +26,15 @@ std::string print(std::string json_object) {
   return s;
 }
 
+void print_event_target_value(val event) {
+  std::cout << event["detail"].call<std::string>("toString") << std::endl;
+}
+
 // This is the extra code you need to write to expose your function to JS
-EMSCRIPTEN_BINDINGS(main) { emscripten::function("print", &print); }
+EMSCRIPTEN_BINDINGS(main) {
+  function("print", &print);
+  function("print_event_target_value", &print_event_target_value);
+}
 
 int main() {
   std::vector<int> ns(3);
@@ -36,7 +45,7 @@ int main() {
     std::cout << n << std::endl;
   }
   std::cout << "Hello world\n";
-  auto document = emscripten::val::global("document");
+  auto document = val::global("document");
   auto div = Document::query_selector("div");
   std::cout << div.call<std::string>("toString") << std::endl;
 }

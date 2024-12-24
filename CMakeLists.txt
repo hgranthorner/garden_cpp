@@ -37,7 +37,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         -s EXPORTED_FUNCTIONS=['_main'] \
         -s ALLOW_MEMORY_GROWTH=1 \
         -s NO_EXIT_RUNTIME=1 \
-        --shell-file ${PROJECT_SOURCE_DIR}/index.html \
+        --shell-file ${PROJECT_SOURCE_DIR}/src/index.html \
         --bind \
         -O3"
 )
