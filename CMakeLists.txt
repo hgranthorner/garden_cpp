@@ -20,7 +20,8 @@ ExternalProject_Add(
 add_custom_target(compile_commands ALL
     COMMAND jq -s '.[0] + .[1]' 
             ${CMAKE_CURRENT_BINARY_DIR}/server/src/server-build/compile_commands.json
-            ${CMAKE_CURRENT_BINARY_DIR}/client/src/client-build/compile_commands.json             > ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+            ${CMAKE_CURRENT_BINARY_DIR}/client/src/client-build/compile_commands.json 
+            > ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
     DEPENDS
             ${CMAKE_CURRENT_BINARY_DIR}/server/src/server-build/compile_commands.json
             ${CMAKE_CURRENT_BINARY_DIR}/client/src/client-build/compile_commands.json
