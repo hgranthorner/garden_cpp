@@ -1,6 +1,8 @@
-set(SERVER_FILE "${SERVER_ROOT}/compile_commands.json")
-set(CLIENT_FILE "${CLIENT_ROOT}/compile_commands.json")
-set(OUTPUT_FILE "${BUILD_ROOT}/compile_commands.json")
+set(SERVER_FILE "${CMAKE_BINARY_DIR}/compile_commands.json")
+set(CLIENT_FILE "${CMAKE_BINARY_DIR}/client/compile_commands.json")
+set(OUTPUT_FILE "${CMAKE_BINARY_DIR}/all/compile_commands.json")
+
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/all")
 
 if(EXISTS "${SERVER_FILE}" AND EXISTS "${CLIENT_FILE}")
     execute_process(

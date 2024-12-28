@@ -5,29 +5,11 @@
 #include <iostream>
 #include <string>
 
+#include "document.hpp"
+
 using val = emscripten::val;
 
 namespace Garden {
-
-// import Document;
-
-class Document {
-public:
-  static val query_selector(const std::string &target) {
-    return _document.call<val>("querySelector", target);
-  }
-
-  static val get_element_by_id(const std::string &id) {
-    return _document.call<val>("getElementById", id);
-  }
-
-private:
-  inline static val _document = val::global("document");
-};
-
-void print_event_target_value(val event) {
-  std::cout << event["detail"].call<std::string>("toString") << std::endl;
-}
 
 void print_event_target_value_test() {
   emscripten_fetch_attr_t attr;
@@ -40,33 +22,37 @@ void print_event_target_value_test() {
   attr.onerror = [](emscripten_fetch_t *fetch) {
     std::cout << "Failed to get data!\n";
   };
-  emscripten_fetch(&attr, "http://localhost:8000/emscripten_probe.html");
+  emscripten_fetch(&attr, "/api/health");
 }
 
-EMSCRIPTEN_BINDINGS(main) {
-  emscripten::function("print_event_target_value", &print_event_target_value);
-  emscripten::function("print_event_target_value_test",
-                       &print_event_target_value_test);
+void add_list_item() {
+  auto plant_list = Document::get_element_by_id("plant-list");
+  auto new_plant = Document::create_element("div");
+  new_plant.set("innerText", "foo");
+  plant_list.call<void>("appendChild", new_plant);
 }
 
 } // namespace Garden
-//
-int main() {
-  std::vector<int> ns(3);
-  for (auto &n : ns) {
-    n = 5;
-  }
-  for (auto &n : ns) {
-    std::cout << n << std::endl;
-  }
-  std::cout << "Hello world\n";
-  auto document = val::global("document");
-  auto div = Garden::Document::query_selector("div");
-  std::cout << div.call<std::string>("toString") << std::endl;
 
+EMSCRIPTEN_BINDINGS(main) {
+  emscripten::function("print_event_target_value_test",
+                       &Garden::print_event_target_value_test);
+  emscripten::function("add_list_item", &Garden::add_list_item);
+}
+
+int main() {
   em_mouse_callback_func cb =
+      [](int event_type, const EmscriptenMouseEvent *event, void *user_data) {
+        Garden::add_list_item();
+        return true;
+      };
+
+  em_mouse_callback_func fetch_cb =
       [](int event_type, const EmscriptenMouseEvent *event, void *user_data) {
         Garden::print_event_target_value_test();
         return true;
       };
+
+  emscripten_set_click_callback("#click", nullptr, false, cb);
+  emscripten_set_click_callback("#click", nullptr, false, fetch_cb);
 }

@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
-
-# Set the Emscripten toolchain file
-# set(CMAKE_TOOLCHAIN_FILE $ENV{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 project(client)
 
 include(FetchContent)
@@ -20,21 +15,13 @@ FetchContent_MakeAvailable(json)
 
 add_executable(${PROJECT_NAME} 
 main.cpp
-# document.cpp
+document.cpp
 )
-
-# target_sources(${PROJECT_NAME}
-#   PUBLIC
-#     FILE_SET modules TYPE CXX_MODULES FILES
-#     document.cpp
-# )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
 execute_process(COMMAND em++ --cflags
     OUTPUT_VARIABLE EM_CFLAGS)
-
-message(${CMAKE_CURRENT_SOURCE_DIR})
 
 # Configure emscripten-specific options
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -57,7 +44,7 @@ add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_CURRENT_SOURCE_DIR}/index.js
-            ${CMAKE_BINARY_DIR}/src/client/index.js
+            ${CMAKE_BINARY_DIR}/index.js
     COMMENT "Copying index.js to build directory"
 )
 
