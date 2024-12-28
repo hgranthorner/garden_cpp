@@ -16,7 +16,7 @@ FetchContent_Declare(
 FetchContent_Declare(
     crow
     GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
-	GIT_TAG v1.2.0
+    GIT_TAG v1.2.0
 )
 
 FetchContent_MakeAvailable(asio)

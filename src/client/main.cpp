@@ -4,9 +4,12 @@
 #include <emscripten/val.h>
 #include <iostream>
 #include <string>
-#include <vector>
 
 using val = emscripten::val;
+
+namespace Garden {
+
+// import Document;
 
 class Document {
 public:
@@ -46,6 +49,8 @@ EMSCRIPTEN_BINDINGS(main) {
                        &print_event_target_value_test);
 }
 
+} // namespace Garden
+//
 int main() {
   std::vector<int> ns(3);
   for (auto &n : ns) {
@@ -56,14 +61,12 @@ int main() {
   }
   std::cout << "Hello world\n";
   auto document = val::global("document");
-  auto div = Document::query_selector("div");
+  auto div = Garden::Document::query_selector("div");
   std::cout << div.call<std::string>("toString") << std::endl;
 
   em_mouse_callback_func cb =
       [](int event_type, const EmscriptenMouseEvent *event, void *user_data) {
-        print_event_target_value_test();
+        Garden::print_event_target_value_test();
         return true;
       };
-
-  emscripten_set_click_callback("#hi", nullptr, false, cb);
 }

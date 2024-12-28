@@ -1,33 +1,34 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.31)
 
 project(fullstack)
 
 include(ExternalProject)
 
-ExternalProject_Add(
-    client
-    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/client"
-    PREFIX client
-    INSTALL_COMMAND ""
-)
-ExternalProject_Add(
-    server 
-    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/server"
-    PREFIX server
-    INSTALL_COMMAND ""
-)
+set(BUILD_ROOT "${PROJECT_SOURCE_DIR}/build")
+set(FETCHCONTENT_BASE_DIR "${BUILD_ROOT}/_deps")
+set(CLIENT_ROOT "${BUILD_ROOT}/client")
+set(SERVER_ROOT "${BUILD_ROOT}/server")
+
+file(MAKE_DIRECTORY ${FETCHCONTENT_BASE_DIR})
+
+add_subdirectory(src/client)
+add_subdirectory(src/server)
 
 add_custom_target(compile_commands ALL
-    COMMAND jq -s '.[0] + .[1]' 
-            ${CMAKE_CURRENT_BINARY_DIR}/server/src/server-build/compile_commands.json
-            ${CMAKE_CURRENT_BINARY_DIR}/client/src/client-build/compile_commands.json 
-            > ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
-    DEPENDS
-            ${CMAKE_CURRENT_BINARY_DIR}/server/src/server-build/compile_commands.json
-            ${CMAKE_CURRENT_BINARY_DIR}/client/src/client-build/compile_commands.json
+    COMMAND ${CMAKE_COMMAND} -E echo "Checking for compile_commands.json files..."
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --green "Attempting to merge compile_commands.json files if they exist"
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/merge_compile_commands.cmake
     COMMENT "Set up compile_commands.json for clangd"
 )
 
-# Make the post_build target depend on both client and server
-add_dependencies(compile_commands client server)
+add_dependencies(compile_commands server client)
 
+add_custom_target(clean_server
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/server
+    COMMENT "Cleaning server project"
+)
+
+add_custom_target(clean_client
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/client
+    COMMENT "Cleaning server project"
+)
