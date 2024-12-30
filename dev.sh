@@ -1,5 +1,9 @@
+cmake -B build -G Ninja && cmake --build build
+./build/src/server/server &
+LAST_PID=$!
+
 #!/usr/bin/env bash
-fswatch src -o -e ".*" -i "CMakeLists.txt$" src | xargs -n1 -I{} sh -c 'echo {} && cmake -B build' &
+fswatch src -o -e ".*" -i "CMakeLists.txt$" src | xargs -n1 -I{} sh -c 'echo {} && cmake -B build -G Ninja' &
 
 fswatch -o -e ".*" -i "\\.[ch]pp$" -o src | while read -r; do
   # Kill the previous command if it's still running

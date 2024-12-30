@@ -8,8 +8,7 @@ include(FetchContent)
 
 FetchContent_Declare(
     asio
-    GIT_REPOSITORY https://github.com/chriskohlhoff/asio.git
-    GIT_TAG asio-1-32-0
+    URL https://github.com/chriskohlhoff/asio/archive/refs/tags/asio-1-32-0.zip
 )
 
 FetchContent_Declare(
@@ -38,13 +37,18 @@ set(ASIO_INCLUDE_DIR ${asio_SOURCE_DIR}/asio/include)
 
 FetchContent_MakeAvailable(crow)
 
-add_executable(${PROJECT_NAME} main.cpp match.cpp)
+add_executable(${PROJECT_NAME} main.cpp match.cpp db.cpp)
 
-target_include_directories(${PROJECT_NAME} INTERFACE ${ASIO_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} 
+INTERFACE
+${ASIO_INCLUDE_DIR}
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE 
 Crow::Crow
 SQLiteCpp
 nlohmann_json::nlohmann_json
 rapidfuzz::rapidfuzz
+shared
 )
 

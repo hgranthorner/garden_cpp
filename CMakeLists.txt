@@ -6,13 +6,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # First define the main project
 project(fullstack)
 
-# Build the server with default toolchain
+add_subdirectory(src/shared)
 add_subdirectory(src/server)
 
 set_target_properties(server
     PROPERTIES
     CMAKE_CURRENT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/server"
 )
+
+set_target_properties(shared
+    PROPERTIES
+    CMAKE_CURRENT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/shared"
+)
+
 
 if (NOT TARGET client)
     execute_process(

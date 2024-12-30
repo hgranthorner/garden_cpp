@@ -1,19 +1,39 @@
-#include <rapidfuzz/fuzz.hpp>
+#include "match.hpp"
+#include "rapidfuzz/fuzz.hpp"
 
-template <typename Sentence1, typename Iterable,
-          typename Sentence2 = typename Iterable::value_type>
-std::vector<std::pair<Sentence2, double>>
-extract(const Sentence1 &query, const Iterable &choices,
-        const double score_cutoff = 0.0) {
-  std::vector<std::pair<Sentence2, double>> results;
+bool PlantSimilarityScore::operator<(const PlantSimilarityScore &right) const {
+  return score < right.score;
+}
 
-  rapidfuzz::fuzz::CachedRatio<typename Sentence1::value_type> scorer(query);
+std::vector<PlantSimilarityScore>
+extract(std::string_view query, const std::vector<Garden::Plant> &choices,
+        const double score_cutoff) {
+  std::vector<PlantSimilarityScore> results;
+
+  rapidfuzz::fuzz::CachedPartialRatio<char> scorer(query);
 
   for (const auto &choice : choices) {
-    double score = scorer.similarity(choice, score_cutoff);
+    double common_name_score =
+        scorer.similarity(choice.common_name, score_cutoff);
+    double scientific_name_score =
+        scorer.similarity(choice.scientific_name, score_cutoff);
+    double family_common_name_score =
+        scorer.similarity(choice.family_common_name, score_cutoff);
+    double synonyms_score = scorer.similarity(choice.synonyms, score_cutoff);
+
+    auto score = std::max(common_name_score, scientific_name_score);
+    score = std::max(score, family_common_name_score);
+    score = std::max(score, synonyms_score);
 
     if (score >= score_cutoff) {
-      results.emplace_back(choice, score);
+      results.push_back(PlantSimilarityScore{
+          choice.id,
+          choice.common_name,
+          choice.scientific_name,
+          choice.family_common_name,
+          choice.synonyms,
+          score,
+      });
     }
   }
 

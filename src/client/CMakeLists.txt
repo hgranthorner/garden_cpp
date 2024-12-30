@@ -18,7 +18,9 @@ main.cpp
 document.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+add_subdirectory(../shared shared)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json shared)
 
 execute_process(COMMAND em++ --cflags
     OUTPUT_VARIABLE EM_CFLAGS)
