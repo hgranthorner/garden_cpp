@@ -51,7 +51,7 @@ void add_list_item(const PlantSimilarityScore &plant) {
       plant.scientific_name, "Genus",           plant.genus,
   };
 
-  for (int i = 0; i < fields.size(); i += 2) {
+  for (unsigned long i = 0; i < fields.size(); i += 2) {
     const auto &label = fields[i];
     const auto &value = fields[i + 1];
     auto div = Document::create_element("div");
@@ -70,16 +70,16 @@ void add_list_item(const PlantSimilarityScore &plant) {
 
   plant_list.call<void>("appendChild", new_plant);
 
-  em_mouse_callback_func cb = [](int event_type,
-                                 const EmscriptenMouseEvent *event,
+  em_mouse_callback_func cb = [](int, const EmscriptenMouseEvent *,
                                  void *user_data) {
     // TODO: Make get request to get the plant and dispay it on the page
-    int plant_id = (int)user_data;
+    int plant_id = reinterpret_cast<int>(user_data);
 
     make_get_request(fmt::format("/api/plants/{}", plant_id),
                      [](struct emscripten_fetch_t *fetch) {
                        std::cout << "Fetched " << fetch->numBytes << " bytes\n";
-                       std::string_view data(fetch->data, fetch->numBytes);
+                       std::string_view data(
+                           fetch->data, static_cast<uint32_t>(fetch->numBytes));
                        Plant plant = json::parse(data);
                        show_plant(plant);
                        emscripten_fetch_close(fetch);
@@ -88,14 +88,15 @@ void add_list_item(const PlantSimilarityScore &plant) {
   };
 
   emscripten_set_click_callback(fmt::format("[data-id='{}']", plant.id).c_str(),
-                                (void *)plant.id, false, cb);
+                                reinterpret_cast<void *>(plant.id), false, cb);
 }
 
 void populate_plant_list(std::string query) {
   make_get_request(
       std::string("/api/search?q=") + query, [](emscripten_fetch_t *fetch) {
         std::cout << "Fetched " << fetch->numBytes << " bytes!\n";
-        std::string_view data(fetch->data, fetch->numBytes);
+        std::string_view data(fetch->data,
+                              static_cast<uint32_t>(fetch->numBytes));
         std::cout << "Fetched " << data << "\n";
         std::vector<PlantSimilarityScore> plants =
             json::parse(data, nullptr, false);
@@ -117,7 +118,7 @@ void get_plants() {
 
 } // namespace Garden
 
-void foo(emscripten::val v) { std::cout << "Here!\n"; }
+void foo(emscripten::val) { std::cout << "Here!\n"; }
 
 EMSCRIPTEN_BINDINGS(main) { emscripten::function("foo", &foo); }
 
@@ -128,20 +129,19 @@ static auto plant_input =
 
 int main() {
 
-  em_mouse_callback_func fetch_cb =
-      [](int event_type, const EmscriptenMouseEvent *event, void *user_data) {
-        Garden::get_plants();
-        return true;
-      };
+  em_mouse_callback_func fetch_cb = [](int, const EmscriptenMouseEvent *,
+                                       void *) {
+    Garden::get_plants();
+    return true;
+  };
 
   em_key_callback_func plant_search_debounce_cb =
-      [](int event_type, const EmscriptenKeyboardEvent *event,
-         void *user_data) {
+      [](int, const EmscriptenKeyboardEvent *, void *) {
         if (debounce_timer_id != -1) {
           emscripten_clear_timeout(debounce_timer_id);
         }
         debounce_timer_id = emscripten_set_timeout(
-            [](void *user_data) {
+            [](void *) {
               auto query = plant_input["value"].call<std::string>("toString");
               Garden::populate_plant_list(query);
             },

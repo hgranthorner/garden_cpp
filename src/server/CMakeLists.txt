@@ -39,6 +39,28 @@ FetchContent_MakeAvailable(crow)
 
 add_executable(${PROJECT_NAME} main.cpp match.cpp db.cpp)
 
+target_compile_options(${PROJECT_NAME} PRIVATE
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
+    -Wshadow
+    -Wunused
+    -Wold-style-cast
+    -Wsign-conversion
+    -Wnull-dereference
+    -fno-common
+    -fsanitize=address
+    -fsanitize=undefined
+    -fno-omit-frame-pointer
+    -Wno-import-preprocessor-directive-pedantic
+)
+
+target_link_options(${PROJECT_NAME} PRIVATE
+    -fsanitize=address
+    -fsanitize=undefined
+)
+
 target_include_directories(${PROJECT_NAME} 
 INTERFACE
 ${ASIO_INCLUDE_DIR}

@@ -30,11 +30,20 @@ target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json share
 execute_process(COMMAND em++ --cflags
     OUTPUT_VARIABLE EM_CFLAGS)
 
+
+set(COMPILER_FLAGS "-Wall -Wextra -Wpedantic -Wconversion -Wshadow -Wunused -Wold-style-cast -Wsign-conversion -Wnull-dereference -fno-common -fsanitize=address -fsanitize=undefined -fsanitize=leak -fno-omit-frame-pointer -Wno-import-preprocessor-directive-pedantic")
+
+set(LINKER_FLAGS "-fsanitize=address -fsanitize=undefined")
+
 # Configure emscripten-specific options
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    COMPILE_FLAGS "${EM_CFLAGS}"
+    COMPILE_FLAGS "${COMPILER_FLAGS} ${EM_CFLAGS}"
     SUFFIX ".html"
     LINK_FLAGS "\
+        -sASSERTIONS=2           # Enable runtime checks \
+        -sSAFE_HEAP=1           # Add memory access checks \
+        -sSTACK_OVERFLOW_CHECK=2 # Add stack overflow checks \
+        -fsanitize=address \
         -s ENVIRONMENT='web' \
         -s USE_ES6_IMPORT_META=0 \
         -s EXPORTED_RUNTIME_METHODS=['ccall','cwrap'] \

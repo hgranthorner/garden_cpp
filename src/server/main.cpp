@@ -44,7 +44,8 @@ search_for_plant(const std::string_view plant_query) {
   }
 
   std::sort(most_similar.rbegin(), most_similar.rend());
-  uint32_t len = std::min(MAX_LENGTH, (uint32_t)most_similar.size());
+  uint32_t len =
+      std::min(MAX_LENGTH, static_cast<uint32_t>(most_similar.size()));
   results.reserve(len);
   std::copy_n(most_similar.begin(), len, std::back_inserter(results));
   return results;
@@ -83,7 +84,7 @@ int main() {
   });
 
   CROW_ROUTE(app, "/<path>")
-  ([](const crow::request &req, const std::string &path) {
+  ([](const std::string &path) {
     // Handle the request automatically with Crow's static handler
     crow::response res;
     auto file_extension = path.substr(path.size() - 3);
