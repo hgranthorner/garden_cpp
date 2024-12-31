@@ -1,3 +1,5 @@
 build*
 .cache
 .clangd
+db.sqlite3
+fetch.sh
