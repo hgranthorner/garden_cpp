@@ -11,7 +11,12 @@ FetchContent_Declare(
     URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
 )
 
-FetchContent_MakeAvailable(json)
+FetchContent_Declare(
+    fmt
+    URL https://github.com/fmtlib/fmt/archive/refs/tags/11.1.1.tar.gz
+)
+
+FetchContent_MakeAvailable(json fmt)
 
 add_executable(${PROJECT_NAME} 
 main.cpp
@@ -20,7 +25,7 @@ document.cpp
 
 add_subdirectory(../shared shared)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json shared)
+target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json shared fmt::fmt)
 
 execute_process(COMMAND em++ --cflags
     OUTPUT_VARIABLE EM_CFLAGS)
@@ -39,7 +44,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         -s FETCH \
         --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/index.html \
         --bind \
-        -O3"
+        -O0"
 )
 
 add_custom_command(

@@ -48,6 +48,9 @@ add_custom_target(compile_commands ALL
     COMMENT "Set up compile_commands.json for clangd"
 )
 
+add_dependencies(server shared)
+add_dependencies(client shared)
+
 add_dependencies(compile_commands server client)
 
 add_custom_target(clean_client

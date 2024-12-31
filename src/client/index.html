@@ -6,16 +6,17 @@
 
 <body>
   <div style="display: flex; flex-direction: row">
-    <div style="width: 66%">
+    <div style="width: 66%; display: flex; flex-direction: column" id="main-content-container">
     </div>
     <div style="display: flex; flex-direction: column">
+      <input id="search-plant-input" type="text" placeholder="Search for plants..." />
       <ul id="plant-list">
       </ul>
     </div>
   </div>
 
-  <button id="click">Click</button>
 
+  <button id="click">Click</button>
   <!---->
   {{{ SCRIPT }}}
   <!---->

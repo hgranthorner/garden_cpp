@@ -1,23 +1,34 @@
 #include "db.hpp"
+#include <optional>
 
 using namespace Garden;
 
-static int64_t num_plants = -1;
-static std::vector<Garden::Plant> all_plants = std::vector<Garden::Plant>();
-
 Plant plant_from_query(const SQLite::Statement &query) {
   Plant plant;
-  plant.id = query.getColumn(0);
-  plant.common_name = std::move(query.getColumn(1).getString());
-  plant.slug = std::move(query.getColumn(2).getString());
-  plant.scientific_name = std::move(query.getColumn(3).getString());
-  plant.family_common_name = std::move(query.getColumn(4).getString());
+
+  plant.id = query.getColumn("id");
+  plant.common_name = query.getColumn("common_name").getString();
+  plant.slug = query.getColumn("slug").getString();
+  plant.scientific_name = query.getColumn("scientific_name").getString();
+  plant.family_common_name = query.getColumn("family_common_name").getString();
+  plant.image_url = query.getColumn("image_url").getString();
+  plant.synonyms = query.getColumn("synonyms").getString();
+  plant.genus = query.getColumn("genus").getString();
+  plant.family = query.getColumn("family").getString();
+  plant.self_link = query.getColumn("self_link").getString();
+  plant.plant_link = query.getColumn("plant_link").getString();
+  plant.genus_link = query.getColumn("genus_link").getString();
   return plant;
 }
 
 const std::string PLANT_QUERY =
-    "SELECT id, common_name, slug, scientific_name, family_common_name FROM "
-    "plants";
+    R"(SELECT id, common_name, slug, scientific_name,
+       family_common_name, image_url, synonyms, genus,
+       family, self_link, plant_link, genus_link 
+       from plants)";
+
+static int64_t num_plants = -1;
+static std::vector<Garden::Plant> all_plants = std::vector<Garden::Plant>();
 
 std::vector<Garden::Plant> get_plants(int count) {
   SQLite::Database db("db.sqlite3");
@@ -30,8 +41,7 @@ std::vector<Garden::Plant> get_plants(int count) {
     SQLite::Statement all_plants_query(db, PLANT_QUERY);
 
     while (all_plants_query.executeStep()) {
-      Plant plant = plant_from_query(all_plants_query);
-      all_plants.push_back(std::move(plant));
+      all_plants.push_back(plant_from_query(all_plants_query));
     }
   }
 
@@ -50,4 +60,15 @@ std::vector<Garden::Plant> get_plants(int count) {
   }
 
   return plants;
+}
+
+std::optional<Plant> get_plant_by_id(int plant_id) {
+  SQLite::Database db("db.sqlite3");
+  SQLite::Statement query(db, PLANT_QUERY + " where id = ? limit 1");
+  query.bind(1, plant_id);
+  if (query.executeStep()) {
+    return plant_from_query(query);
+  } else {
+    return std::nullopt;
+  }
 }
